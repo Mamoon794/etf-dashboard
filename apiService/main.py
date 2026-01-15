@@ -1,7 +1,18 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 
 app  = FastAPI()
+
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():
@@ -44,15 +55,15 @@ def process_csv(file: UploadFile = File(...)):
 
 
     holdings = sorted(holdings, key=lambda x: x["holdings"], reverse=True)[:5]
+    table_info = sorted(table_info, key=lambda x: x["name"])
 
     # Calculate price of etf.
     for column in filtered_prices.columns:
         filtered_prices[column] = filtered_prices[column] * uploaded_weights[column]
 
-    etf_price = filtered_prices.sum(axis=1)
-    # csc413 coming in handy, big brain move
+    etf_price = filtered_prices.sum(axis=1) # csc413 coming in handy, big brain move
     etf_price = round(etf_price, 3).to_dict()
     etf_price = {str(date.date()): price for date, price in etf_price.items()}
    
 
-    return {"filename": file.filename, "table_info": table_info, "holdings": holdings, "etf_price": etf_price, "status": "uploaded"}
+    return {"filename": file.filename, "table_info": table_info, "top_holdings": holdings, "etf_price": etf_price}
