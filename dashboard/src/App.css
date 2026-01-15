@@ -1,0 +1,17 @@
+th {
+  border: 1px solid #ccc;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+td{
+    border: 1px solid #ccc;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}

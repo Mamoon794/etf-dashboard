@@ -209,17 +209,17 @@ function TableInfo({ data }: { data: Array<{ name: string; weight: number, recen
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-blue-100">
-              <th className="border px-4 py-2 text-left font-semibold">Name</th>
-              <th className="border px-4 py-2 text-left font-semibold">Weight</th>
-              <th className="border px-4 py-2 text-left font-semibold">Recent Price</th>
+              <th>Name</th>
+              <th>Weight</th>
+              <th>Recent Price</th>
             </tr>
           </thead>
           <tbody>
             {data.map((item, index) => (
               <tr key={index} className="hover:bg-gray-50">
-                <td className="border px-4 py-2">{item.name}</td>
-                <td className="border px-4 py-2">{item.weight}</td>
-                <td className="border px-4 py-2">${item.recent_price}</td>
+                <td>{item.name}</td>
+                <td>{item.weight}</td>
+                <td>${item.recent_price}</td>
               </tr>
             ))}
           </tbody>
