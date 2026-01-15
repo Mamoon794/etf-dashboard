@@ -5,6 +5,8 @@ import { Box } from '@mui/material'
 import { Upload, InsertDriveFile } from '@mui/icons-material'
 import axios from 'axios';
 import { Line, Bar } from 'react-chartjs-2';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,18 +38,29 @@ function App() {
   const [tableData, setTableData] = useState<Array<{ name: string; weight: number; recent_price: number }> | null>(null);
 
   async function handleFileUpload(file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await axios.post('http://127.0.0.1:8000/process-csv', formData);
-    console.log(response.data);
-    setEtfData(response.data.etf_price);
-    setHoldingsData(response.data.top_holdings);
-    setTableData(response.data.table_info);
-    console.log("ETF Data:", response.data.top_holdings);
+    try{
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await axios.post('http://127.0.0.1:8000/process-csv', formData);
+      console.log(response.data);
+      setEtfData(response.data.etf_price);
+      setHoldingsData(response.data.top_holdings);
+      setTableData(response.data.table_info);
+      return true;
+    } catch (error: any) {
+      if (error.response?.data?.detail) {
+        toast.error(error.response.data.detail);
+      }
+      else{
+        toast.error("An error occurred while processing the file.");
+      }
+      return false;
+    }
   }
 
   return (
     <div>
+      <ToastContainer position="top-right" autoClose={3000} />
       <h1 className='text-4xl font-bold text-center text-gray-800 p-8'>ETF Dashboard</h1>
       <CsvUpload onFileUpload={handleFileUpload} />
       {(etfData || holdingsData) && (
@@ -63,15 +76,21 @@ function App() {
 }
 
 
-function CsvUpload({ onFileUpload}: { onFileUpload?: (file: File) => void }) {
+function CsvUpload({ onFileUpload}: { onFileUpload?: (file: File) => Promise<boolean> }) {
   const [fileName, setFileName] = useState<String | null>(null)
+  const [color, setColor] = useState<String | null>(null)
 
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>){
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>){
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && onFileUpload){
+      const result = await onFileUpload(file);
       setFileName(file.name);
-      if (onFileUpload) onFileUpload(file);
+      setColor(result ? "green": "red");
+    }
+    else if (file){
+      setFileName(file.name);
+      setColor("green");
     }
   }
 
@@ -118,9 +137,9 @@ function CsvUpload({ onFileUpload}: { onFileUpload?: (file: File) => void }) {
 
         {/* On Success */}
         {fileName && (
-          <div className='mt-4 p-3 bg-green-50 rounded-md flex items-center justify-center'>
-            <InsertDriveFile className="text-green-600 mr-2" />
-          <span className="text-green-700 font-medium">
+          <div className={`mt-4 p-3 bg-${color}-50 rounded-md flex items-center justify-center`}>
+            <InsertDriveFile className={`text-${color}-600 mr-2`} />
+          <span className={`font-medium text-${color}-700`}>
             {fileName}
           </span>
           </div>
@@ -172,7 +191,7 @@ function TopHoldings({ data }: { data: Array<{name: string, holdings: number}> }
     responsive: true,
     plugins: {
       legend: { position: 'top' as const},
-      title: { display: true, text: 'Monthly Sales' },
+      title: { display: true, text: 'Top 5 Holdings by Value' },
     },
   });
 
@@ -180,7 +199,7 @@ function TopHoldings({ data }: { data: Array<{name: string, holdings: number}> }
     labels: data.map(item => item.name),
     datasets: [
       {
-        label: 'Sales ($)',
+        label: 'Value ($)',
         data: data.map(item => item.holdings),
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
       },

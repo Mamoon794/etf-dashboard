@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 
@@ -23,6 +23,14 @@ def process_csv(file: UploadFile = File(...)):
 
     # First read the uploaded CSV file and the prices CSV file
     uploaded_file = pd.read_csv(file.file)
+
+
+    # Error handling for missing columns
+    required_columns = ['name', 'weight']
+    missing_columns = [col for col in required_columns if col not in uploaded_file.columns]
+    if missing_columns:
+        raise HTTPException(status_code=400, detail=f"Missing columns in uploaded file: {', '.join(missing_columns)}")
+
     prices = pd.read_csv("prices.csv", index_col=0, parse_dates=True)
     prices = prices.sort_index(ascending=False)
 
