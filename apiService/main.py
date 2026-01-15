@@ -36,7 +36,7 @@ def process_csv(file: UploadFile = File(...)):
 
     # Convert uploaded weights to a list of dictionaries
     uploaded_weights = uploaded_file.to_dict(orient='records')
-    uploaded_weights = {item['name']: item['weight'] for item in uploaded_weights} # For consistency. The inconsistency was bothering me. :)
+    uploaded_weights = {item['name']: item['weight'] for item in uploaded_weights} # For consistency.
 
     # Calculate holdings and prepare information needed for the table
     table_info = []
@@ -44,13 +44,13 @@ def process_csv(file: UploadFile = File(...)):
     for name, weight in uploaded_weights.items():
         holdings.append({
             "name": name,
-            "holdings": round(weight * recent_prices[0][name], 3)
+            "holdings": round(weight * recent_prices[0][name], 2)
         })
         
         table_info.append({
             "name": name,
             "weight": weight,
-            "recent_price": round(recent_prices[0][name], 3)
+            "recent_price": round(recent_prices[0][name], 2)
         })
 
 
@@ -61,7 +61,7 @@ def process_csv(file: UploadFile = File(...)):
     for column in filtered_prices.columns:
         filtered_prices[column] = filtered_prices[column] * uploaded_weights[column]
 
-    etf_price = filtered_prices.sum(axis=1) # csc413 coming in handy, big brain move
+    etf_price = filtered_prices.sum(axis=1) 
     etf_price = round(etf_price, 3).to_dict()
     etf_price = {str(date.date()): price for date, price in etf_price.items()}
    

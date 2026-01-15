@@ -48,7 +48,7 @@ function App() {
 
   return (
     <div>
-      <h1 className='text-6xl flex items-center justify-center p-5'>ETF Dashboard</h1>
+      <h1 className='text-4xl font-bold text-center text-gray-800 p-8'>ETF Dashboard</h1>
       <CsvUpload onFileUpload={handleFileUpload} />
       {(etfData || holdingsData) && (
         <div className='mt-10 mx-10 grid grid-cols-2 gap-6'>
