@@ -7,10 +7,11 @@ import axios from 'axios';
 
 function App() {
 
-  function handleFileUpload(file: File) {
+  async function handleFileUpload(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    axios.post('http://127.0.0.1:8000/upload-csv', formData);
+    const response = await axios.post('http://127.0.0.1:8000/process-csv', formData);
+    return response.data;
   }
 
   return (
