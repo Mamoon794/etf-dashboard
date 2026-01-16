@@ -1,10 +1,12 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
+from helper import process_data
 
 app  = FastAPI()
 
 
+global_uploaded_file = {}
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,47 +33,42 @@ def process_csv(file: UploadFile = File(...)):
     if missing_columns:
         raise HTTPException(status_code=400, detail=f"Missing columns in uploaded file: {', '.join(missing_columns)}")
 
-    prices = pd.read_csv("prices.csv", index_col=0, parse_dates=True)
-    prices = prices.sort_index(ascending=False)
 
-
-    # Then filter the prices to only have the names that are also in the uploaded file
-    names = uploaded_file['name'].tolist()
-    filtered_prices = prices[names]
-
-    # Get the most recent prices
-    recent_prices = filtered_prices.head(1).to_dict(orient='records')
-
-    # Convert uploaded weights to a list of dictionaries
-    uploaded_weights = uploaded_file.to_dict(orient='records')
-    uploaded_weights = {item['name']: item['weight'] for item in uploaded_weights} # For consistency.
-
-    # Calculate holdings and prepare information needed for the table
-    table_info = []
-    holdings = []
-    for name, weight in uploaded_weights.items():
-        holdings.append({
-            "name": name,
-            "holdings": round(weight * recent_prices[0][name], 2)
-        })
-        
-        table_info.append({
-            "name": name,
-            "weight": weight,
-            "recent_price": round(recent_prices[0][name], 2)
-        })
-
-
-    holdings = sorted(holdings, key=lambda x: x["holdings"], reverse=True)[:5]
-    table_info = sorted(table_info, key=lambda x: x["name"])
-
-    # Calculate price of etf.
-    for column in filtered_prices.columns:
-        filtered_prices[column] = filtered_prices[column] * uploaded_weights[column]
-
-    etf_price = filtered_prices.sum(axis=1) 
-    etf_price = round(etf_price, 3).to_dict()
-    etf_price = {str(date.date()): price for date, price in etf_price.items()}
-   
+    result = process_data(uploaded_file)
+    global_uploaded_file['file'] = uploaded_file
+    table_info = result['table_info']
+    holdings = result['top_holdings']
+    etf_price = result['etf_price']
 
     return {"filename": file.filename, "table_info": table_info, "top_holdings": holdings, "etf_price": etf_price}
+
+
+
+@app.put("/update_data")
+def update_data(request: dict):
+    key, field, value = request['key'], request['field'], request['value']
+    prices = pd.read_csv("prices.csv", index_col=0, parse_dates=True)
+    prices = prices.sort_index(ascending=True)
+    uploaded_file = global_uploaded_file.get('file')
+
+    if uploaded_file is None:
+        raise HTTPException(status_code=400, detail="No uploaded file found. Please upload a CSV file first.")
+
+    if field == "recent_price":
+        prices.at[prices.index[-1], key] = value
+        prices.to_csv("prices.csv")
+    else:
+        row_index = uploaded_file.index[uploaded_file['name'] == key].tolist()[0]
+        uploaded_file.at[row_index, field] = value
+
+
+    result = process_data(uploaded_file)
+    global_uploaded_file['file'] = uploaded_file
+
+    table_info = result['table_info']
+    holdings = result['top_holdings']
+    etf_price = result['etf_price']
+
+    return {"table_info": table_info, "top_holdings": holdings, "etf_price": etf_price}
+
+

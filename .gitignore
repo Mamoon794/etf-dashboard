@@ -20,6 +20,7 @@
 *.pem
 __pycache__/
 package-lock.json
+.vscode/
 
 # debug
 npm-debug.log*
