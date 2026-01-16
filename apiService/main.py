@@ -25,6 +25,7 @@ def process_csv(file: UploadFile = File(...)):
 
     # First read the uploaded CSV file and the prices CSV file
     uploaded_file = pd.read_csv(file.file)
+    uploaded_file = uploaded_file.dropna()
 
 
     # Error handling for missing columns

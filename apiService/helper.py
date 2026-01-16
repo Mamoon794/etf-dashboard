@@ -37,10 +37,10 @@ def process_data(uploaded_file: pd.DataFrame):
 
     # Calculate price of etf.
     for column in filtered_prices.columns:
-        filtered_prices[column] = filtered_prices[column] * uploaded_weights[column]
+        filtered_prices.loc[:, column] = filtered_prices[column] * uploaded_weights[column]
 
     etf_price = filtered_prices.sum(axis=1) 
-    etf_price = round(etf_price, 3).to_dict()
+    etf_price = round(etf_price, 2).to_dict()
     etf_price = {str(date.date()): price for date, price in etf_price.items()}
    
     return {"table_info": table_info, "top_holdings": holdings, "etf_price": etf_price}
