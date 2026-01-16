@@ -13,6 +13,7 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
+import zoomPlugin from 'chartjs-plugin-zoom';
 
 ChartJS.register(
     CategoryScale,
@@ -22,7 +23,8 @@ ChartJS.register(
     BarElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    zoomPlugin
 );
 
 
@@ -33,20 +35,20 @@ function EtfTimeSeriesPlot({ data }: { data: Record<string, number> }) {
     function filterDataByTimeRange(data: Record<string, number>, range: string): Record<string, number> {
         const dates = Object.keys(data).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         let filteredDates: string[];
-        let startingDate = new Date('2017-01-01');
+        let endDate = new Date('2017-04-10');
 
         switch (range) {
             case '1week':
-                const oneWeekAgo = new Date(startingDate.getTime() + 7 * 24 * 60 * 60 * 1000);
-                filteredDates = dates.filter(date => new Date(date) <= oneWeekAgo);
+                const oneWeekAgo = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+                filteredDates = dates.filter(date => new Date(date) >= oneWeekAgo);
                 break;
             case '1month':
-                const oneMonthAgo = new Date(startingDate.getTime() + 30 * 24 * 60 * 60 * 1000);
-                filteredDates = dates.filter(date => new Date(date) <= oneMonthAgo);
+                const oneMonthAgo = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+                filteredDates = dates.filter(date => new Date(date) >= oneMonthAgo);
                 break;
             case '3months':
-                const threeMonthsAgo = new Date(startingDate.getTime() + 90 * 24 * 60 * 60 * 1000);
-                filteredDates = dates.filter(date => new Date(date) <= threeMonthsAgo);
+                const threeMonthsAgo = new Date(endDate.getTime() - 90 * 24 * 60 * 60 * 1000);
+                filteredDates = dates.filter(date => new Date(date) >= threeMonthsAgo);
                 break;
             default:
                 filteredDates = dates;
@@ -68,6 +70,21 @@ function EtfTimeSeriesPlot({ data }: { data: Record<string, number> }) {
         plugins: {
             legend: { position: 'bottom' as const },
             title: { display: true, text: 'ETF Price' },
+            zoom: {
+                zoom: {
+                    wheel: {
+                        enabled: true,
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    mode: 'x' as const,
+                },
+                pan: {
+                    enabled: true,
+                    mode: 'x' as const,
+                },
+            }
         },
     });
 
@@ -174,10 +191,6 @@ function TableInfo({ data, updateData }: { data: Array<Row>, updateData: (rowInd
 
         if (updateData){
             if (numericValue === oldValue) return;
-
-            
-            
-            
 
             let key = tableData[rowIndex].name;
             await updateData(key, field, tableData[rowIndex][field]);
