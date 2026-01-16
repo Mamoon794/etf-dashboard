@@ -27,6 +27,37 @@ ChartJS.register(
     zoomPlugin
 );
 
+const getETFGraphOptions = () => ({
+    responsive: true,
+    plugins: {
+        legend: { position: 'bottom' as const },
+        title: { display: true, text: 'ETF Price' },
+        zoom: {
+            zoom: {
+                wheel: {
+                    enabled: true,
+                },
+                pinch: {
+                    enabled: true
+                },
+                mode: 'x' as const,
+            },
+            pan: {
+                enabled: true,
+                mode: 'x' as const,
+            },
+        }
+    },
+});
+
+const getHoldingsOptions = () => ({
+    responsive: true,
+    plugins: {
+        legend: { position: 'top' as const },
+        title: { display: true, text: 'Top 5 Holdings by Value' },
+    },
+});
+
 
 // Data is {str(date): double(price)}
 function EtfTimeSeriesPlot({ data }: { data: Record<string, number> }) {
@@ -63,30 +94,6 @@ function EtfTimeSeriesPlot({ data }: { data: Record<string, number> }) {
     }
 
     const filteredData = filterDataByTimeRange(data, timeRange);
-
-
-    const getETFGraphOptions = () => ({
-        responsive: true,
-        plugins: {
-            legend: { position: 'bottom' as const },
-            title: { display: true, text: 'ETF Price' },
-            zoom: {
-                zoom: {
-                    wheel: {
-                        enabled: true,
-                    },
-                    pinch: {
-                        enabled: true
-                    },
-                    mode: 'x' as const,
-                },
-                pan: {
-                    enabled: true,
-                    mode: 'x' as const,
-                },
-            }
-        },
-    });
 
     const getETFData = ({ data }: { data: Record<string, number> }) => ({
         labels: Object.keys(data),
@@ -128,13 +135,6 @@ function EtfTimeSeriesPlot({ data }: { data: Record<string, number> }) {
 }
 
 function TopHoldings({ data }: { data: Array<{ name: string, holdings: number }> }) {
-    const getHoldingsOptions = () => ({
-        responsive: true,
-        plugins: {
-            legend: { position: 'top' as const },
-            title: { display: true, text: 'Top 5 Holdings by Value' },
-        },
-    });
 
     const getHoldingsData = ({ data }: { data: Array<{ name: string, holdings: number }> }) => ({
         labels: data.map(item => item.name),
@@ -166,6 +166,7 @@ type Row = { name: string; weight: number; recent_price: number };
 function TableInfo({ data, updateData }: { data: Array<Row>, updateData: (rowIndex: string, field: keyof Row, value: string | number) => Promise<void> }) {
     const [tableData, setTableData] = useState<Row[]>(data);
     const [originalData, setOriginalData] = useState<Row[]>(JSON.parse(JSON.stringify(data)));
+    const [whichSort, setWhichSort] = useState<{ key: keyof Row | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
 
 
     // Function to handle editing of a cell. It allows string input because user may type non-numeric values. Like (.)
@@ -206,6 +207,27 @@ function TableInfo({ data, updateData }: { data: Array<Row>, updateData: (rowInd
         }
     }
 
+    // Function to handle sorting
+    function handleSort (key: keyof Row) {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (whichSort.key === key && whichSort.direction === 'asc') {
+            direction = 'desc';
+        }
+        setWhichSort({ key, direction });
+
+        const sortedData = [...tableData].sort((a, b) => {
+            if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+            if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        setTableData(sortedData);
+    };
+
+    function getSortIcon (key: keyof Row) {
+        if (whichSort.key !== key) return '⇅';
+        return whichSort.direction === 'asc' ? '↑' : '↓';
+    };
+
     return (
         <Paper elevation={3} sx={{ borderRadius: 2, p: 3 }} className='w-full mt-6 '>
             <h3 className='text-lg font-bold text-grey-700 mb-4'>Table Information</h3>
@@ -213,9 +235,15 @@ function TableInfo({ data, updateData }: { data: Array<Row>, updateData: (rowInd
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="bg-blue-100">
-                            <th>Name</th>
-                            <th>Weight</th>
-                            <th>Recent Price</th>
+                            <th className="cursor-pointer hover:bg-blue-200" onClick={() => handleSort('name')}>
+                                Name {getSortIcon('name')}
+                            </th>
+                            <th className="cursor-pointer hover:bg-blue-200" onClick={() => handleSort('weight')}>
+                                Weight {getSortIcon('weight')}
+                            </th>
+                            <th className="cursor-pointer hover:bg-blue-200" onClick={() => handleSort('recent_price')}>
+                                Recent Price {getSortIcon('recent_price')}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
