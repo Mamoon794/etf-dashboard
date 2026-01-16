@@ -168,6 +168,7 @@ function TableInfo({ data, updateData }: { data: Array<Row>, updateData: (rowInd
     const [originalData, setOriginalData] = useState<Row[]>(JSON.parse(JSON.stringify(data)));
 
 
+    // Function to handle editing of a cell. It allows string input because user may type non-numeric values. Like (.)
     function handleEditing(rowIndex: number, field: keyof Row, value: string) {
         const updatedData = [...tableData];
 
@@ -176,11 +177,14 @@ function TableInfo({ data, updateData }: { data: Array<Row>, updateData: (rowInd
         setTableData(updatedData);
     }
 
+    // Function to handle when user leaves the input field (onBlur). It converts to number, handles wrong number inputs and updates the charts data
     async function handleBlur(rowIndex: number, field: keyof Row) {
         const newValue = tableData[rowIndex][field];
         const oldValue = originalData[rowIndex][field];
 
         let numericValue = parseFloat(newValue.toString());
+
+        // If the input is not a valid number, revert to old value
         if (isNaN(numericValue)) {
             numericValue = parseFloat(oldValue.toString());
         }
@@ -189,6 +193,7 @@ function TableInfo({ data, updateData }: { data: Array<Row>, updateData: (rowInd
         setTableData(updatedData); 
 
 
+        // Update the data for all charts
         if (updateData){
             if (numericValue === oldValue) return;
 
@@ -203,7 +208,7 @@ function TableInfo({ data, updateData }: { data: Array<Row>, updateData: (rowInd
 
     return (
         <Paper elevation={3} sx={{ borderRadius: 2, p: 3 }} className='w-full mt-6 '>
-            <h3 className='text-lg font-bold text-grey-700 mb-4'>Portfolio Details</h3>
+            <h3 className='text-lg font-bold text-grey-700 mb-4'>Table Information</h3>
             <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                     <thead>

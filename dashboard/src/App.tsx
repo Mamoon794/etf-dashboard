@@ -16,18 +16,31 @@ function App() {
     const [holdingsData, setHoldingsData] = useState<Array<{ name: string; holdings: number }> | null>(null);
     const [tableData, setTableData] = useState<Array<{ name: string; weight: number; recent_price: number }> | null>(null);
 
+
+    // Function to update data when table cell is edited
     async function updateData(key: string, field: string, value: string | number) {
 
-        const response = await axios.put('http://127.0.0.1:8000/update_data', {
-            key: key,
-            field: field,
-            value: value
-        });
-        setEtfData(response.data.etf_price);
-        setHoldingsData(response.data.top_holdings);
-        setTableData(response.data.table_info);
+        try{
+            const response = await axios.put('http://127.0.0.1:8000/update_data', {
+                key: key,
+                field: field,
+                value: value
+            });
+            setEtfData(response.data.etf_price);
+            setHoldingsData(response.data.top_holdings);
+            setTableData(response.data.table_info);
+        } catch (error: any) {
+            if (error.response?.data?.detail) {
+                toast.error(error.response.data.detail);
+            }
+            else {
+                toast.error("An error occurred while updating the data.");
+            }
+        }
     }
 
+
+    // Function to handle the initial file upload and get the necessary data
     async function handleFileUpload(file: File) {
         try {
             const formData = new FormData();
@@ -72,6 +85,7 @@ function CsvUpload({ onFileUpload }: { onFileUpload?: (file: File) => Promise<bo
     const [color, setColor] = useState<String | null>("blue")
 
 
+    // Handle for when user selects a file
     async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
         const file = event.target.files?.[0];
         if (file && onFileUpload) {

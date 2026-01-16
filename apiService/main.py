@@ -5,7 +5,7 @@ from helper import process_data
 
 app  = FastAPI()
 
-
+# Since it wasn't specified to use a database, I'm using a global variable to store the uploaded file data.
 global_uploaded_file = {}
 
 app.add_middleware(
@@ -24,7 +24,11 @@ def root():
 def process_csv(file: UploadFile = File(...)):
 
     # First read the uploaded CSV file and the prices CSV file
-    uploaded_file = pd.read_csv(file.file)
+    try:
+        uploaded_file = pd.read_csv(file.file)
+    except pd.errors.EmptyDataError:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty or invalid CSV.")
+    
     uploaded_file = uploaded_file.dropna()
 
 
