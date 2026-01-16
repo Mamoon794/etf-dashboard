@@ -1,7 +1,11 @@
 import pandas as pd
 
 def process_data(uploaded_file: pd.DataFrame):
-    prices = pd.read_csv("prices.csv", index_col=0, parse_dates=True)
+
+    try:
+        prices = pd.read_csv("prices.csv", index_col=0, parse_dates=True)
+    except pd.errors.EmptyDataError:
+        return {"error": "Prices CSV file is empty or invalid."}
     prices = prices.sort_index(ascending=True)
 
     # Then filter the prices to only have the names that are also in the uploaded file

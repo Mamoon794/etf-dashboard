@@ -5,7 +5,7 @@ from helper import process_data
 
 app  = FastAPI()
 
-# Since it wasn't specified to use a database, I'm using a global variable to store the uploaded file data.
+# Since it wasn't specified to use a database, I'm using a global variable to store the uploaded file data for updates.
 global_uploaded_file = {}
 
 app.add_middleware(
@@ -40,6 +40,9 @@ def process_csv(file: UploadFile = File(...)):
 
 
     result = process_data(uploaded_file)
+    if 'error' in result:
+        raise HTTPException(status_code=400, detail=result['error'])
+    
     global_uploaded_file['file'] = uploaded_file
     table_info = result['table_info']
     holdings = result['top_holdings']
@@ -68,6 +71,9 @@ def update_data(request: dict):
 
 
     result = process_data(uploaded_file)
+    if 'error' in result:
+        raise HTTPException(status_code=400, detail=result['error'])
+    
     global_uploaded_file['file'] = uploaded_file
 
     table_info = result['table_info']
