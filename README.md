@@ -27,20 +27,21 @@ A single-page web application that allows the user to upload ETF Files to view h
 * **Data Processing:** Pandas - Used for vectorized calculation of weighted sums and ease of data manipulation.
 * **Unit Testing:** Pytest + `TestClient`
 
-## 🏗️ Architecture & Design Choices
+## Architecture & Design Choices
 
 ### 1. Python for Data Processing
 
 The project required heavy data manipulation, especially for etf price calculation. Python (Pandas) was chosen over Node.js for the backend because of pandas' capability to handle large datasets efficiently. 
 
-## ⚠️ Assumptions & Constraints
+## Assumptions & Constraints
 
 
 2. **Static Weights:** The ETF weights are treated as constant over the entire history.
 3. **Market Data:** The backend expects a file named `prices.csv` to exist in the root directory containing historical data indexed by Date.
-4. **Interactive Table:** The interactive table allows for modifying weights and recent prices, but it is assumed that "name" fields are not editable and are unique to maintain data integrity. Also allows for sorting for each column.
+4. **Interactive Table:** The interactive table allows for modifying weights and recent prices, but it is assumed that "name" fields are not editable and are unique to maintain data integrity.
+5. **Uploaded CSV Storage:** The uploaded CSV files are not stored in a database as there was no requirement for persistent storage. Each upload is stored in-memory for that session.
 
-## 📦 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -67,7 +68,7 @@ uvicorn main:app --reload
 
 ```
 
-*The API will start at `http://127.0.0.1:8000*`
+The API will start at `http://127.0.0.1:8000`
 
 ### 2. Frontend Setup
 
@@ -83,7 +84,7 @@ npm run dev
 
 ```
 
-*The app will be available at `http://localhost:5173*`
+The app will be available at `http://localhost:5173`
 
 ## 🧪 Running Tests
 
@@ -96,7 +97,7 @@ pytest unitTests.py
 ```
 
 
-## 🔮 Future Improvements
+## Future Improvements
 
 * **Dynamic Rebalancing:** Support for ETFs where weights change over time.
 * **Database Implementation:** Store the uploaded files and calculated results for faster retrieval.
