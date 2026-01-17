@@ -5,11 +5,9 @@ A single-page web application that allows the user to upload ETF Files to view h
 ## Features
 
 * **CSV Upload:** Interface to upload ETF configuration files (`name, weight`).
-* **Time Series Plot:** Visualizes the calculated historical price of the ETF using a weighted sum algorithm and shows in a zoomable line chart.
-* **Top Holdings:** Bar chart displaying the top 5 constituents by market value and displays in a bar chart.
+* **Time Series Plot:** Visualizes the calculated historical price of the ETF using a weighted sum algorithm and shows in a zoomable line chart. Also allows filtering by time ranges (1 week, 1 month, 3 months, All).
+* **Top Holdings:** Bar chart displaying the top 5 constituents by market value.
 * **Data Table:** Detailed view of all constituents, weights, and most recent close prices. Shows in an interactive table.
-
-
 * **Real-time Validation:** Toast notifications for upload status and error handling.
 
 ## Tech Stack
@@ -68,7 +66,7 @@ uvicorn main:app --reload
 
 ```
 
-The API will start at `http://127.0.0.1:8000`
+The backend will start at `http://127.0.0.1:8000`
 
 ### 2. Frontend Setup
 
