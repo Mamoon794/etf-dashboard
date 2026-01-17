@@ -38,7 +38,7 @@ The project required heavy data manipulation, especially for etf price calculati
 
 2. **Static Weights:** The ETF weights are treated as constant over the entire history.
 3. **Market Data:** The backend expects a file named `prices.csv` to exist in the root directory containing historical data indexed by Date.
-4. **Interactive Table:** The interactive table allows for modifying weights and recent prices, but it is assumed that "name" fields are not editable and are unique to maintain data integrity.
+4. **Interactive Table:** The interactive table allows for modifying weights and recent prices, but it is assumed that "name" fields are not editable and are unique to maintain data integrity. Also allows for sorting for each column.
 
 ## 📦 Installation & Setup
 

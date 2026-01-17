@@ -66,7 +66,7 @@ function EtfTimeSeriesPlot({ data }: { data: Record<string, number> }) {
     function filterDataByTimeRange(data: Record<string, number>, range: string): Record<string, number> {
         const dates = Object.keys(data).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         let filteredDates: string[];
-        let endDate = new Date('2017-04-10');
+        let endDate = new Date(Object.keys(data)[Object.keys(data).length - 1]); // Usually would be new Date(), but here assume today is the last date in data
 
         switch (range) {
             case '1week':
